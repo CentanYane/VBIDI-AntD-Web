@@ -3,17 +3,32 @@
 import { request } from 'umi';
 
 /** Returns pet inventories by status Returns a map of status codes to quantities GET /store/inventory */
-export async function getInventory(options?: { [key: string]: any }) {
+export async function getInventory(
+  params: {
+    // path
+  },
+  options?: { [key: string]: any },
+) {
+  const { ...queryParams } = params;
   return request<Record<string, any>>('/store/inventory', {
     method: 'GET',
+    params: { ...queryParams },
     ...(options || {}),
   });
 }
 
 /** Place an order for a pet POST /store/order */
-export async function placeOrder(body: API.Order, options?: { [key: string]: any }) {
+export async function placeOrder(
+  params: {
+    // path
+  },
+  body: API.Order,
+  options?: { [key: string]: any },
+) {
+  const { ...queryParams } = params;
   return request<API.Order>('/store/order', {
     method: 'POST',
+    params: { ...queryParams },
     data: body,
     ...(options || {}),
   });
@@ -28,10 +43,10 @@ export async function getOrderById(
   },
   options?: { [key: string]: any },
 ) {
-  const { orderId: param0 } = params;
+  const { orderId: param0, ...queryParams } = params;
   return request<API.Order>(`/store/order/${param0}`, {
     method: 'GET',
-    params: { ...params },
+    params: { ...queryParams },
     ...(options || {}),
   });
 }
@@ -45,10 +60,10 @@ export async function deleteOrder(
   },
   options?: { [key: string]: any },
 ) {
-  const { orderId: param0 } = params;
+  const { orderId: param0, ...queryParams } = params;
   return request<any>(`/store/order/${param0}`, {
     method: 'DELETE',
-    params: { ...params },
+    params: { ...queryParams },
     ...(options || {}),
   });
 }

@@ -3,9 +3,17 @@
 import { request } from 'umi';
 
 /** Create user This can only be done by the logged in user. POST /user */
-export async function createUser(body: API.User, options?: { [key: string]: any }) {
+export async function createUser(
+  params: {
+    // path
+  },
+  body: API.User,
+  options?: { [key: string]: any },
+) {
+  const { ...queryParams } = params;
   return request<any>('/user', {
     method: 'POST',
+    params: { ...queryParams },
     data: body,
     ...(options || {}),
   });
@@ -13,20 +21,33 @@ export async function createUser(body: API.User, options?: { [key: string]: any 
 
 /** Creates list of users with given input array POST /user/createWithArray */
 export async function createUsersWithArrayInput(
+  params: {
+    // path
+  },
   body: API.User[],
   options?: { [key: string]: any },
 ) {
+  const { ...queryParams } = params;
   return request<any>('/user/createWithArray', {
     method: 'POST',
+    params: { ...queryParams },
     data: body,
     ...(options || {}),
   });
 }
 
 /** Creates list of users with given input array POST /user/createWithList */
-export async function createUsersWithListInput(body: API.User[], options?: { [key: string]: any }) {
+export async function createUsersWithListInput(
+  params: {
+    // path
+  },
+  body: API.User[],
+  options?: { [key: string]: any },
+) {
+  const { ...queryParams } = params;
   return request<any>('/user/createWithList', {
     method: 'POST',
+    params: { ...queryParams },
     data: body,
     ...(options || {}),
   });
@@ -40,22 +61,31 @@ export async function loginUser(
     username: string;
     /** The password for login in clear text */
     password: string;
+    // path
   },
   options?: { [key: string]: any },
 ) {
+  const { ...queryParams } = params;
   return request<string>('/user/login', {
     method: 'GET',
     params: {
-      ...params,
+      ...queryParams,
     },
     ...(options || {}),
   });
 }
 
 /** Logs out current logged in user session GET /user/logout */
-export async function logoutUser(options?: { [key: string]: any }) {
+export async function logoutUser(
+  params: {
+    // path
+  },
+  options?: { [key: string]: any },
+) {
+  const { ...queryParams } = params;
   return request<any>('/user/logout', {
     method: 'GET',
+    params: { ...queryParams },
     ...(options || {}),
   });
 }
@@ -69,10 +99,10 @@ export async function getUserByName(
   },
   options?: { [key: string]: any },
 ) {
-  const { username: param0 } = params;
+  const { username: param0, ...queryParams } = params;
   return request<API.User>(`/user/${param0}`, {
     method: 'GET',
-    params: { ...params },
+    params: { ...queryParams },
     ...(options || {}),
   });
 }
@@ -87,10 +117,10 @@ export async function updateUser(
   body: API.User,
   options?: { [key: string]: any },
 ) {
-  const { username: param0 } = params;
+  const { username: param0, ...queryParams } = params;
   return request<any>(`/user/${param0}`, {
     method: 'PUT',
-    params: { ...params },
+    params: { ...queryParams },
     data: body,
     ...(options || {}),
   });
@@ -105,10 +135,10 @@ export async function deleteUser(
   },
   options?: { [key: string]: any },
 ) {
-  const { username: param0 } = params;
+  const { username: param0, ...queryParams } = params;
   return request<any>(`/user/${param0}`, {
     method: 'DELETE',
-    params: { ...params },
+    params: { ...queryParams },
     ...(options || {}),
   });
 }

@@ -2,70 +2,32 @@
 /* eslint-disable */
 
 declare namespace API {
-  type CurrentUser = {
+  type UserInfoQueryParams = {
+    /** 用户识别id */
+    userId: string;
+  };
+
+  type UserInfo = {
+    /** 要显示在界面上的用户名 */
     name?: string;
+    /** 用户头像链接 */
     avatar?: string;
-    userid?: string;
-    email?: string;
-    signature?: string;
-    title?: string;
+    /** 用户所属权限组，比如Admin、Watcher */
     group?: string;
-    tags?: { key?: string; label?: string }[];
-    notifyCount?: number;
-    unreadCount?: number;
-    country?: string;
-    access?: string;
-    geographic?: {
-      province?: { label?: string; key?: string };
-      city?: { label?: string; key?: string };
-    };
-    address?: string;
-    phone?: string;
   };
 
   type LoginResult = {
-    status?: string;
-    type?: string;
-    currentAuthority?: string;
-  };
-
-  type PageParams = {
-    current?: number;
-    pageSize?: number;
-  };
-
-  type RuleListItem = {
-    key?: number;
-    disabled?: boolean;
-    href?: string;
-    avatar?: string;
-    name?: string;
-    owner?: string;
-    desc?: string;
-    callNo?: number;
-    status?: number;
-    updatedAt?: string;
-    createdAt?: string;
-    progress?: number;
-  };
-
-  type RuleList = {
-    data?: RuleListItem[];
-    /** 列表的内容总数 */
-    total?: number;
-    success?: boolean;
-  };
-
-  type FakeCaptcha = {
-    code?: number;
-    status?: string;
+    /** 登陆验证结果，比如ok、fail、error。不为ok时返回内容不含token（或为空） */
+    status: string;
+    /** token，根据userId计算，无超时 */
+    token: string;
+    /** 用户识别id */
+    userId: string;
   };
 
   type LoginParams = {
-    username?: string;
-    password?: string;
-    autoLogin?: boolean;
-    type?: string;
+    username: string;
+    password: string;
   };
 
   type ErrorResponse = {
@@ -77,25 +39,43 @@ declare namespace API {
     success?: boolean;
   };
 
-  type NoticeIconList = {
-    data?: NoticeIconItem[];
+  type StreamItem = {
+    /** 视频流id */
+    id?: string;
+    /** 取流时在链接后附加的key（eg rstp://link/?key=xxx），可以没有 */
+    key?: string;
+    /** 视频流标题 */
+    title?: string;
+    /** 视频流地址 */
+    href?: string;
+  };
+
+  type StreamList = {
+    data?: StreamItem[];
     /** 列表的内容总数 */
     total?: number;
     success?: boolean;
   };
 
-  type NoticeIconItemType = 'notification' | 'message' | 'event';
-
-  type NoticeIconItem = {
+  type StreamSquareItem = {
+    /** 方框id */
     id?: string;
-    extra?: string;
-    key?: string;
-    read?: boolean;
-    avatar?: string;
-    title?: string;
-    status?: string;
-    datetime?: string;
-    description?: string;
-    type?: NoticeIconItemType;
+    /** 识别对象名称 */
+    name?: string;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    /** 识别对象在哪一个分组内 */
+    group?: string;
+  };
+
+  type StreamSquareList = {
+    /** 视频流id，指示这些方框是应用于哪一个视频流的 */
+    id?: string;
+    data?: StreamSquareItem[];
+    /** 列表的内容总数 */
+    total?: number;
+    success?: boolean;
   };
 }

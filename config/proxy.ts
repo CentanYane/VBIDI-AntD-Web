@@ -7,16 +7,21 @@
  * https://pro.ant.design/docs/deploy
  */
 export default {
+  '/api/': {
+    target: 'http://localhost:8000',
+    changeOrigin: true,
+    pathRewrite: { '^': '' },
+  },
   dev: {
     '/api/': {
-      target: 'https://preview.pro.ant.design',
+      target: 'http://localhost:8000',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
   },
   test: {
     '/api/': {
-      target: 'https://preview.pro.ant.design',
+      target: 'http://localhost:8000', // https://preview.pro.ant.design',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },

@@ -5,7 +5,7 @@ import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
 import { history, Link } from 'umi';
 import RightContent from '@/components/RightContent';
 import Footer from '@/components/Footer';
-import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
+import { queryUserInfo } from './services/ant-design-pro/auth';
 import { BookOutlined, LinkOutlined } from '@ant-design/icons';
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -21,24 +21,44 @@ export const initialStateConfig = {
  * */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
-  currentUser?: API.CurrentUser;
-  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+  userId?: string;
+  token?: string;
+  userInfo?: API.UserInfo;
+  fetchUserInfo?: () => Promise<API.UserInfo | undefined>;
 }> {
+  const removeLocalStorage = async () => {
+    localStorage.removeItem('userId');
+    localStorage.removeItem('token');
+  };
   const fetchUserInfo = async () => {
     try {
-      const msg = await queryCurrentUser();
-      return msg.data;
+      const localUserId = localStorage.getItem('userId');
+      if (!localUserId) throw new Error();
+      const data = await queryUserInfo(
+        {},
+        { userId: localUserId },
+        {
+          headers: { Authorized: `Bearer ${localStorage.getItem('token')}` },
+        },
+      );
+      return data;
     } catch (error) {
+      removeLocalStorage();
       history.push(loginPath);
     }
+    removeLocalStorage();
     return undefined;
   };
-  // 如果是登录页面，不执行
+  // 如果不是登录页面，获取userId和token，执行
   if (history.location.pathname !== loginPath) {
-    const currentUser = await fetchUserInfo();
+    const userInfo = await fetchUserInfo();
+    const localUserId = localStorage.getItem('userId');
+    const localToken = localStorage.getItem('token');
     return {
       fetchUserInfo,
-      currentUser,
+      userInfo,
+      userId: localUserId == null ? undefined : localUserId,
+      token: localToken == null ? undefined : localToken,
       settings: {},
     };
   }
@@ -98,6 +118,17 @@ export const request: RequestConfig = {
     }
     throw error;
   },
+  /*   requestInterceptors: [
+    (url, options) => {
+      return {
+        url,
+        options: {
+          ...options,
+          headers: { ...options.headers, Authorized: `Bearerr ${localStorage.getItem('token')}` },
+        },
+      };
+    },
+  ], */
 };
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
@@ -106,13 +137,13 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     rightContentRender: () => <RightContent />,
     disableContentMargin: false,
     waterMarkProps: {
-      content: initialState?.currentUser?.name,
+      content: initialState?.userInfo?.name,
     },
     footerRender: () => <Footer />,
     onPageChange: () => {
       const { location } = history;
       // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
+      if (!initialState?.userInfo && location.pathname !== loginPath) {
         history.push(loginPath);
       }
     },

@@ -3,24 +3,40 @@
 import { request } from 'umi';
 
 /** Update an existing pet PUT /pet */
-export async function updatePet(body: API.Pet, options?: { [key: string]: any }) {
+export async function updatePet(
+  params: {
+    // path
+  },
+  body: API.Pet,
+  options?: { [key: string]: any },
+) {
+  const { ...queryParams } = params;
   return request<any>('/pet', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
+    params: { ...queryParams },
     data: body,
     ...(options || {}),
   });
 }
 
 /** Add a new pet to the store POST /pet */
-export async function addPet(body: API.Pet, options?: { [key: string]: any }) {
+export async function addPet(
+  params: {
+    // path
+  },
+  body: API.Pet,
+  options?: { [key: string]: any },
+) {
+  const { ...queryParams } = params;
   return request<any>('/pet', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+    params: { ...queryParams },
     data: body,
     ...(options || {}),
   });
@@ -32,15 +48,16 @@ export async function findPetsByStatus(
     // query
     /** Status values that need to be considered for filter */
     status: 'available' | 'pending' | 'sold'[];
+    // path
   },
   options?: { [key: string]: any },
 ) {
+  const { ...queryParams } = params;
   return request<API.Pet[]>('/pet/findByStatus', {
     method: 'GET',
     params: {
-      ...params,
+      ...queryParams,
     },
-
     ...(options || {}),
   });
 }
@@ -51,15 +68,16 @@ export async function findPetsByTags(
     // query
     /** Tags to filter by */
     tags: string[];
+    // path
   },
   options?: { [key: string]: any },
 ) {
+  const { ...queryParams } = params;
   return request<API.Pet[]>('/pet/findByTags', {
     method: 'GET',
     params: {
-      ...params,
+      ...queryParams,
     },
-
     ...(options || {}),
   });
 }
@@ -73,11 +91,10 @@ export async function getPetById(
   },
   options?: { [key: string]: any },
 ) {
-  const { petId: param0 } = params;
+  const { petId: param0, ...queryParams } = params;
   return request<API.Pet>(`/pet/${param0}`, {
     method: 'GET',
-    params: { ...params },
-
+    params: { ...queryParams },
     ...(options || {}),
   });
 }
@@ -92,7 +109,7 @@ export async function updatePetWithForm(
   body: { name?: string; status?: string },
   options?: { [key: string]: any },
 ) {
-  const { petId: param0 } = params;
+  const { petId: param0, ...queryParams } = params;
   const formData = new FormData();
 
   Object.keys(body).forEach((ele) => {
@@ -108,7 +125,7 @@ export async function updatePetWithForm(
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    params: { ...params },
+    params: { ...queryParams },
     data: formData,
     ...(options || {}),
   });
@@ -125,10 +142,11 @@ export async function deletePet(
   },
   options?: { [key: string]: any },
 ) {
-  const { petId: param0 } = params;
+  const { petId: param0, ...queryParams } = params;
   return request<any>(`/pet/${param0}`, {
     method: 'DELETE',
-    params: { ...params },
+    headers: {},
+    params: { ...queryParams },
     ...(options || {}),
   });
 }
@@ -141,11 +159,14 @@ export async function uploadFile(
     petId: number;
   },
   body: { additionalMetadata?: string; file?: string },
+  files?: File[],
   options?: { [key: string]: any },
 ) {
-  const { petId: param0 } = params;
+  const { petId: param0, ...queryParams } = params;
   const formData = new FormData();
-
+  if (files) {
+    formData.append('file', files[0] || '');
+  }
   Object.keys(body).forEach((ele) => {
     const item = (body as any)[ele];
 
@@ -159,7 +180,7 @@ export async function uploadFile(
     headers: {
       'Content-Type': 'multipart/form-data',
     },
-    params: { ...params },
+    params: { ...queryParams },
     data: formData,
     ...(options || {}),
   });
