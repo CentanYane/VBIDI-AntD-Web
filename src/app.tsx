@@ -25,8 +25,9 @@ export async function getInitialState(): Promise<{
   token?: string;
   userInfo?: API.UserInfo;
   fetchUserInfo?: () => Promise<API.UserInfo | undefined>;
+  removeLoginStorage?: () => void;
 }> {
-  const removeLocalStorage = async () => {
+  const removeLoginStorage = async () => {
     localStorage.removeItem('userId');
     localStorage.removeItem('token');
   };
@@ -38,15 +39,15 @@ export async function getInitialState(): Promise<{
         {},
         { userId: localUserId },
         {
-          headers: { Authorized: `Bearer ${localStorage.getItem('token')}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         },
       );
       return data;
     } catch (error) {
-      removeLocalStorage();
+      removeLoginStorage();
       history.push(loginPath);
     }
-    removeLocalStorage();
+    removeLoginStorage();
     return undefined;
   };
   // 如果不是登录页面，获取userId和token，执行
@@ -56,6 +57,7 @@ export async function getInitialState(): Promise<{
     const localToken = localStorage.getItem('token');
     return {
       fetchUserInfo,
+      removeLoginStorage,
       userInfo,
       userId: localUserId == null ? undefined : localUserId,
       token: localToken == null ? undefined : localToken,
@@ -64,6 +66,7 @@ export async function getInitialState(): Promise<{
   }
   return {
     fetchUserInfo,
+    removeLoginStorage,
     settings: {},
   };
 }
@@ -118,17 +121,6 @@ export const request: RequestConfig = {
     }
     throw error;
   },
-  /*   requestInterceptors: [
-    (url, options) => {
-      return {
-        url,
-        options: {
-          ...options,
-          headers: { ...options.headers, Authorized: `Bearerr ${localStorage.getItem('token')}` },
-        },
-      };
-    },
-  ], */
 };
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout

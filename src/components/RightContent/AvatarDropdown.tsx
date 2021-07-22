@@ -15,7 +15,7 @@ export type GlobalHeaderRightProps = {
  * 退出登录，并且将当前的 url 保存
  */
 const loginOut = async () => {
-  sessionStorage.clear()
+  sessionStorage.clear();
   const { query = {}, pathname } = history.location;
   const { redirect } = query;
   // Note: There may be security issues, please note
@@ -36,13 +36,19 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
     (event: MenuInfo) => {
       const { key } = event;
       if (key === 'logout') {
-        setInitialState((s) => ({ ...s, userInfo: undefined }));
+        if (initialState?.removeLoginStorage) initialState.removeLoginStorage();
+        setInitialState((s) => ({
+          ...s,
+          userId: undefined,
+          token: undefined,
+          userInfo: undefined,
+        }));
         loginOut();
         return;
       }
       history.push(`/account/${key}`);
     },
-    [setInitialState],
+    [initialState, setInitialState],
   );
 
   const loading = (

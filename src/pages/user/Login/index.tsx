@@ -49,15 +49,17 @@ const Login: React.FC = () => {
         message.success(defaultloginSuccessMessage);
         localStorage.setItem('userId',msg.userId);
         localStorage.setItem('token',msg.token);
-        await setInitialState({
+        await setInitialState((s) => ({
+          ...s,
           userId: msg.userId,
           token: msg.token,
-        });
+        }));
         const userInfo = await initialState?.fetchUserInfo?.();
         if (userInfo) {
-          await setInitialState({
-            userInfo,
-          });
+          await setInitialState((s) => ({
+            ...s,
+            userInfo
+          }));
         }
         /** 此方法会跳转到 redirect 参数所在的位置 */
         if (!history) return;
