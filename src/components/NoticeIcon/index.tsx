@@ -3,7 +3,7 @@ import { Tag, message } from 'antd';
 import { groupBy } from 'lodash';
 import moment from 'moment';
 import { useModel, useRequest } from 'umi';
-import { getNotices } from '@/services/ant-design-pro/api';
+import { getNotices } from '@/services/ant-design-pro/notice';
 
 import NoticeIcon from './NoticeIcon';
 import styles from './index.less';
@@ -72,7 +72,7 @@ const getUnreadData = (noticeData: Record<string, API.NoticeIconItem[]>) => {
 
 const NoticeIconView = () => {
   const { initialState } = useModel('@@initialState');
-  const { currentUser } = initialState || {};
+  const { userInfo } = initialState || {};
   const [notices, setNotices] = useState<API.NoticeIconItem[]>([]);
   const { data } = useRequest(getNotices);
 
@@ -111,7 +111,7 @@ const NoticeIconView = () => {
   return (
     <NoticeIcon
       className={styles.action}
-      count={currentUser && currentUser.unreadCount}
+      count={userInfo && userInfo.unreadCount}
       onItemClick={(item) => {
         changeReadState(item.id!);
       }}
