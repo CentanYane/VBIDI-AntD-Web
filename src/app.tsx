@@ -3,10 +3,12 @@ import { PageLoading } from '@ant-design/pro-layout';
 import { notification } from 'antd';
 import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
 import { history, Link } from 'umi';
+import type { RequestOptionsInit } from 'umi-request';
 import RightContent from '@/components/RightContent';
 import Footer from '@/components/Footer';
 import { queryUserInfo } from './services/ant-design-pro/auth';
 import { BookOutlined, LinkOutlined } from '@ant-design/icons';
+import { isNull } from 'lodash';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -24,52 +26,46 @@ export async function getInitialState(): Promise<{
   userId?: string;
   token?: string;
   userInfo?: API.UserInfo;
-  fetchUserInfo?: () => Promise<API.UserInfo | undefined>;
-  removeLoginStorage?: () => void;
 }> {
-  const removeLoginStorage = async () => {
-    localStorage.removeItem('userId');
-    localStorage.removeItem('token');
-  };
-  const fetchUserInfo = async () => {
-    try {
-      const localUserId = localStorage.getItem('userId');
-      if (!localUserId) throw new Error();
-      const data = await queryUserInfo(
-        {},
-        { userId: localUserId },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        },
-      );
-      return data;
-    } catch (error) {
-      removeLoginStorage();
-      history.push(loginPath);
-    }
-    removeLoginStorage();
-    return undefined;
-  };
-  // 如果不是登录页面，获取userId和token，执行
+  // 如果不是登录页面，获取userInfo、userId和token，执行
   if (history.location.pathname !== loginPath) {
-    const userInfo = await fetchUserInfo();
-    const localUserId = localStorage.getItem('userId');
-    const localToken = localStorage.getItem('token');
-    return {
-      fetchUserInfo,
-      removeLoginStorage,
-      userInfo,
-      userId: localUserId == null ? undefined : localUserId,
-      token: localToken == null ? undefined : localToken,
-      settings: {},
-    };
+    try {
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      if (!userId || !token || isNull(userId) || !isNull(token)) throw new Error();
+      const userInfo = await queryUserInfo({}, { userId });
+      if (!userInfo) throw new Error();
+      // 获取成功
+      return {
+        userInfo,
+        userId,
+        token,
+        settings: {},
+      };
+    } catch (error) {
+      // 获取失败，退回登陆界面
+      localStorage.removeItem('userId');
+      localStorage.removeItem('token');
+      history.push(loginPath);
+      return {
+        settings: {},
+      };
+    }
   }
+  // 如果是登录页面，不返回部分信息
   return {
-    fetchUserInfo,
-    removeLoginStorage,
     settings: {},
   };
 }
+
+/** 请求拦截，在header内添加token */
+const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
+  const authHeader = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+  return {
+    url: `${url}`,
+    options: { ...options, interceptors: true, headers: authHeader },
+  };
+};
 
 /**
  * 异常处理程序
@@ -121,6 +117,7 @@ export const request: RequestConfig = {
     }
     throw error;
   },
+  requestInterceptors: [authHeaderInterceptor],
 };
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout

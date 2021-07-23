@@ -2,7 +2,7 @@
 /* eslint-disable */
 
 declare namespace API {
-  type UserInfoQueryParams = {
+  type SafeQueryParams = {
     /** 用户识别id */
     userId: string;
   };

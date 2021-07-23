@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import ProForm, { ProFormText } from '@ant-design/pro-form';
 import { useIntl, Link, history, FormattedMessage, SelectLang, useModel } from 'umi';
 import Footer from '@/components/Footer';
-import { login } from '@/services/ant-design-pro/auth';
+import { login, queryUserInfo } from '@/services/ant-design-pro/auth';
 
 import styles from './index.less';
 
@@ -39,28 +39,31 @@ const Login: React.FC = () => {
       const msg = await login({}, { ...values });
       if (msg.status === 'ok') {
         // 如果token无或者长度为0，报error
-        if(!msg.token?.length) {
-          throw new Error("no token");
+        if(!msg.token?.length||!msg.userId?.length) {
+          throw new Error("校验信息不完整");
         }
         const defaultloginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: '登录成功！',
         });
         message.success(defaultloginSuccessMessage);
+        // 设置本地储存
         localStorage.setItem('userId',msg.userId);
         localStorage.setItem('token',msg.token);
-        await setInitialState((s) => ({
-          ...s,
+        // 手动setInitialState
+        await setInitialState({
+          ...initialState,
           userId: msg.userId,
           token: msg.token,
-        }));
-        const userInfo = await initialState?.fetchUserInfo?.();
+        });
+        const userInfo = await queryUserInfo({}, { userId: msg.userId });
         if (userInfo) {
           await setInitialState((s) => ({
             ...s,
             userInfo
           }));
         }
+        else throw new Error("无法获取用户信息");
         /** 此方法会跳转到 redirect 参数所在的位置 */
         if (!history) return;
         const { query } = history.location;
@@ -71,12 +74,7 @@ const Login: React.FC = () => {
       // 如果失败去设置用户错误信息
       setUserLoginState(msg);
     } catch (error) {
-      const defaultloginFailureMessage = intl.formatMessage({
-        id: 'pages.login.failure',
-        defaultMessage: '登录失败',
-      });
-
-      message.error(defaultloginFailureMessage);
+      message.error(error.message);
     }
     setSubmitting(false);
   };

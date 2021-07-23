@@ -7,7 +7,7 @@ export async function queryUserInfo(
   params: {
     // path
   },
-  body: API.UserInfoQueryParams,
+  body: API.SafeQueryParams,
   options?: { [key: string]: any },
 ) {
   const { ...queryParams } = params;

@@ -1,378 +1,370 @@
 {
-  "openapi": "3.0.1",
-  "info": {
-    "title": "Ant Design Pro",
-    "version": "1.0.0"
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Ant Design Pro",
+    "version" : "1.0.0"
   },
-  "servers": [
-    {
-      "url": "http://localhost:8000/"
-    },
-    {
-      "url": "https://localhost:8000/"
-    }
-  ],
-  "paths": {
-    "/api/auth/userInfo": {
-      "post": {
-        "tags": [
-          "auth"
-        ],
-        "description": "获取用户信息",
-        "operationId": "queryUserInfo",
-        "security": [
-          {
-            "UserToken": []
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserInfoQueryParams"
+  "servers" : [ {
+    "url" : "http://localhost:8000/"
+  }, {
+    "url" : "https://localhost:8000/"
+  } ],
+  "paths" : {
+    "/api/auth/userInfo" : {
+      "post" : {
+        "tags" : [ "auth" ],
+        "description" : "获取用户信息",
+        "operationId" : "queryUserInfo",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SafeQueryParams"
               }
             }
           },
-          "required": true
+          "required" : true
         },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserInfo"
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserInfo"
                 }
               }
             }
           },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "x-swagger-router-controller": "auth"
-    },
-    "/api/auth/login": {
-      "post": {
-        "tags": [
-          "auth"
-        ],
-        "description": "登录接口",
-        "operationId": "login",
-        "requestBody": {
-          "description": "登录系统",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginParams"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResult"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+          "401" : {
+            "description" : "Error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             }
           }
         },
-        "x-codegen-request-body-name": "body"
+        "security" : [ {
+          "UserToken" : [ ]
+        } ]
       },
-      "x-swagger-router-controller": "auth"
+      "x-swagger-router-controller" : "auth"
     },
-    "/api/live/streams": {
-      "get": {
-        "tags": [
-          "live"
-        ],
-        "description": "获取直播视频流列表",
-        "operationId": "queryStreams",
-        "security": [
-          {
-            "UserToken": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StreamList"
+    "/api/auth/login" : {
+      "post" : {
+        "tags" : [ "auth" ],
+        "description" : "登录接口",
+        "operationId" : "login",
+        "requestBody" : {
+          "description" : "登录系统",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginParams"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LoginResult"
                 }
               }
             }
           },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+          "401" : {
+            "description" : "Error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             }
           }
-        }
+        },
+        "x-codegen-request-body-name" : "body"
       },
-      "x-swagger-router-controller": "live"
+      "x-swagger-router-controller" : "auth"
     },
-    "/api/live/streamSquares": {
-      "get": {
-        "tags": [
-          "live"
-        ],
-        "description": "获取直播视频识别框列表",
-        "operationId": "queryStreamSquares",
-        "security": [
-          {
-            "UserToken": []
+    "/api/live/streams" : {
+      "post" : {
+        "tags" : [ "live" ],
+        "description" : "获取直播视频流列表",
+        "operationId" : "queryStreams",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SafeQueryParams"
+              }
+            }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StreamSquareList"
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StreamList"
                 }
               }
             }
           },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+          "401" : {
+            "description" : "Error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "UserToken" : [ ]
+        } ]
       },
-      "x-swagger-router-controller": "live"
+      "x-swagger-router-controller" : "live"
+    },
+    "/api/live/streamSquares" : {
+      "post" : {
+        "tags" : [ "live" ],
+        "description" : "获取直播视频识别框列表",
+        "operationId" : "queryStreamSquares",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SafeQueryParams"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StreamSquareList"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "UserToken" : [ ]
+        } ]
+      },
+      "x-swagger-router-controller" : "live"
     }
   },
-  "components": {
-    "securitySchemes": {
-      "UserToken": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "TOKEN",
-        "description": "用户进行操作时传输token(在header内)给服务器进行验证"
+  "components" : {
+    "schemas" : {
+      "SafeQueryParams" : {
+        "required" : [ "userId" ],
+        "type" : "object",
+        "properties" : {
+          "userId" : {
+            "type" : "string",
+            "description" : "用户识别id"
+          }
+        }
+      },
+      "UserInfo" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "要显示在界面上的用户名"
+          },
+          "avatar" : {
+            "type" : "string",
+            "description" : "用户头像链接"
+          },
+          "group" : {
+            "type" : "string",
+            "description" : "用户所属权限组，比如Admin、Watcher"
+          }
+        }
+      },
+      "LoginResult" : {
+        "required" : [ "status", "token", "userId" ],
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "description" : "登陆验证结果，比如ok、fail、error。不为ok时返回内容不含token（或为空）"
+          },
+          "token" : {
+            "type" : "string",
+            "description" : "token，根据userId计算，无超时"
+          },
+          "userId" : {
+            "type" : "string",
+            "description" : "用户识别id"
+          }
+        },
+        "description" : "用户登陆成功时返回的内容"
+      },
+      "LoginParams" : {
+        "required" : [ "password", "username" ],
+        "type" : "object",
+        "properties" : {
+          "username" : {
+            "type" : "string"
+          },
+          "password" : {
+            "type" : "string",
+            "format" : "password"
+          }
+        },
+        "description" : "用户登陆所需要的参数"
+      },
+      "ErrorResponse" : {
+        "required" : [ "errorCode" ],
+        "type" : "object",
+        "properties" : {
+          "errorCode" : {
+            "type" : "string",
+            "description" : "业务约定的错误码"
+          },
+          "errorMessage" : {
+            "type" : "string",
+            "description" : "业务上的错误信息"
+          },
+          "success" : {
+            "type" : "boolean",
+            "description" : "业务上的请求是否成功"
+          }
+        }
+      },
+      "StreamItem" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "视频流id"
+          },
+          "key" : {
+            "type" : "string",
+            "description" : "取流时在链接后附加的key（eg rstp://link/?key=xxx），可以没有"
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "视频流标题"
+          },
+          "href" : {
+            "type" : "string",
+            "description" : "视频流地址"
+          }
+        }
+      },
+      "StreamList" : {
+        "required" : [ "userId" ],
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StreamItem"
+            }
+          },
+          "total" : {
+            "type" : "integer",
+            "description" : "列表的内容总数",
+            "format" : "int32"
+          },
+          "success" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "StreamSquareItem" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "方框id"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "识别对象名称"
+          },
+          "x" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "y" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "width" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "height" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "group" : {
+            "type" : "string",
+            "description" : "识别对象在哪一个分组内"
+          }
+        }
+      },
+      "StreamSquareList" : {
+        "required" : [ "userId" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "视频流id，指示这些方框是应用于哪一个视频流的"
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StreamSquareItem"
+            }
+          },
+          "total" : {
+            "type" : "integer",
+            "description" : "列表的内容总数",
+            "format" : "int32"
+          },
+          "success" : {
+            "type" : "boolean"
+          }
+        }
       }
     },
-    "schemas": {
-      "UserInfoQueryParams": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string",
-            "description": "用户识别id"
-          }
-        },
-        "required": [
-          "userId"
-        ]
-      },
-      "UserInfo": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "要显示在界面上的用户名"
-          },
-          "avatar": {
-            "type": "string",
-            "description": "用户头像链接"
-          },
-          "group": {
-            "type": "string",
-            "description": "用户所属权限组，比如Admin、Watcher"
-          }
-        }
-      },
-      "LoginResult": {
-        "type": "object",
-        "description": "用户登陆成功时返回的内容",
-        "properties": {
-          "status": {
-            "type": "string",
-            "description": "登陆验证结果，比如ok、fail、error。不为ok时返回内容不含token（或为空）"
-          },
-          "token": {
-            "type": "string",
-            "description": "token，根据userId计算，无超时"
-          },
-          "userId": {
-            "type": "string",
-            "description": "用户识别id"
-          }
-        },
-        "required": [
-          "status",
-          "token",
-          "userId"
-        ]
-      },
-      "LoginParams": {
-        "type": "object",
-        "description": "用户登陆所需要的参数",
-        "properties": {
-          "username": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string",
-            "format": "password"
-          }
-        },
-        "required": [
-          "username",
-          "password"
-        ]
-      },
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "errorCode": {
-            "type": "string",
-            "description": "业务约定的错误码"
-          },
-          "errorMessage": {
-            "type": "string",
-            "description": "业务上的错误信息"
-          },
-          "success": {
-            "type": "boolean",
-            "description": "业务上的请求是否成功"
-          }
-        },
-        "required": [
-          "errorCode"
-        ]
-      },
-      "StreamItem": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "视频流id"
-          },
-          "key": {
-            "type": "string",
-            "description": "取流时在链接后附加的key（eg rstp://link/?key=xxx），可以没有"
-          },
-          "title": {
-            "type": "string",
-            "description": "视频流标题"
-          },
-          "href": {
-            "type": "string",
-            "description": "视频流地址"
-          }
-        }
-      },
-      "StreamList": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StreamItem"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "description": "列表的内容总数",
-            "format": "int32"
-          },
-          "success": {
-            "type": "boolean"
-          }
-        }
-      },
-      "StreamSquareItem": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "方框id"
-          },
-          "name": {
-            "type": "string",
-            "description": "识别对象名称"
-          },
-          "x": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "y": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "width": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "height": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "group": {
-            "type": "string",
-            "description": "识别对象在哪一个分组内"
-          }
-        }
-      },
-      "StreamSquareList": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "视频流id，指示这些方框是应用于哪一个视频流的"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StreamSquareItem"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "description": "列表的内容总数",
-            "format": "int32"
-          },
-          "success": {
-            "type": "boolean"
-          }
-        }
+    "securitySchemes" : {
+      "UserToken" : {
+        "type" : "http",
+        "description" : "用户进行操作时传输token(在header内)给服务器进行验证",
+        "scheme" : "bearer",
+        "bearerFormat" : "TOKEN"
       }
     }
   }

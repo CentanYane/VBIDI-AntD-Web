@@ -22,6 +22,12 @@
     component: './Welcome',
   },
   {
+    path: '/livestream',
+    name: 'livestream',
+    icon: 'smile',
+    component: './LiveStream',
+  },
+  {
     path: '/admin',
     name: 'admin',
     icon: 'crown',

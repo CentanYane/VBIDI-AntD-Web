@@ -16,6 +16,8 @@ export type GlobalHeaderRightProps = {
  */
 const loginOut = async () => {
   sessionStorage.clear();
+  localStorage.removeItem('userId');
+  localStorage.removeItem('token');
   const { query = {}, pathname } = history.location;
   const { redirect } = query;
   // Note: There may be security issues, please note
@@ -36,13 +38,14 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
     (event: MenuInfo) => {
       const { key } = event;
       if (key === 'logout') {
-        if (initialState?.removeLoginStorage) initialState.removeLoginStorage();
-        setInitialState((s) => ({
-          ...s,
-          userId: undefined,
-          token: undefined,
-          userInfo: undefined,
-        }));
+        if(initialState) {
+          setInitialState({
+            ...initialState,
+            userId: undefined,
+            token: undefined,
+            userInfo: undefined,
+          });
+        }
         loginOut();
         return;
       }
