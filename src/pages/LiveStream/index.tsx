@@ -5,17 +5,22 @@ import ReactDOM from 'react-dom';
 import { queryStreams } from '@/services/ant-design-pro/live';
 import { useModel } from 'umi';
 import { random } from 'lodash';
+import ReactPlayer from 'react-player';
 
 const VideoBlock: React.FC<{
-  href?: string,
-  id?: string,
-  index?: number,
+  href?: string;
+  id?: string;
+  index?: number;
 }> = ({ href, id, index }) => {
   let streamId = id;
-  if (!id) streamId=random().toString()
+  if (!id) streamId = random().toString();
   return (
     <div>
-      <video controls id={`stream-id_${streamId}`} src={href} className={`player player-index_${index}`}></video>
+      <ReactPlayer
+        url={href}
+        id={`stream-id_${streamId}`}
+        className={`player player-index_${index}`}
+      ></ReactPlayer>
     </div>
   );
 };
@@ -23,13 +28,13 @@ const VideoBlock: React.FC<{
 const handleFetchStreams = async (body: API.SafeQueryParams): Promise<API.StreamList> => {
   message.loading('正在获取直播流列表');
   try {
-    const data = await queryStreams({},body);
+    const data = await queryStreams({}, body);
     if (!data.success) throw new Error();
-    message.destroy()
+    message.destroy();
     message.success('获取成功');
     return data;
   } catch (error) {
-    message.destroy()
+    message.destroy();
     message.error('获取失败');
     return {};
   }
