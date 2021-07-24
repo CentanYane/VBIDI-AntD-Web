@@ -32,7 +32,7 @@ export async function getInitialState(): Promise<{
     try {
       const userId = localStorage.getItem('userId');
       const token = localStorage.getItem('token');
-      if (!userId || !token || isNull(userId) || !isNull(token)) throw new Error();
+      if (!userId || !token || isNull(userId) || isNull(token)) throw new Error();
       const userInfo = await queryUserInfo({}, { userId });
       if (!userInfo) throw new Error();
       // 获取成功
