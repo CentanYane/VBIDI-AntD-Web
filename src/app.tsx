@@ -23,28 +23,24 @@ export const initialStateConfig = {
  * */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
-  userId?: string;
   token?: string;
   userInfo?: API.UserInfo;
 }> {
-  // 如果不是登录页面，获取userInfo、userId和token，执行
+  // 如果不是登录页面，获取userInfo、token，执行
   if (history.location.pathname !== loginPath) {
     try {
-      const userId = localStorage.getItem('userId');
       const token = localStorage.getItem('token');
-      if (!userId || !token || isNull(userId) || isNull(token)) throw new Error();
-      const userInfo = await queryUserInfo({}, { userId });
+      if (!token || isNull(token)) throw new Error();
+      const userInfo = await queryUserInfo({});
       if (!userInfo) throw new Error();
       // 获取成功
       return {
         userInfo,
-        userId,
         token,
         settings: {},
       };
     } catch (error) {
       // 获取失败，退回登陆界面
-      localStorage.removeItem('userId');
       localStorage.removeItem('token');
       history.push(loginPath);
       return {

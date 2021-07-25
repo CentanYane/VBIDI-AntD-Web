@@ -1,0 +1,41 @@
+@import '~antd/es/style/themes/default.less';
+
+@card-interval-space: 24px;
+
+.playerCardsContainer {
+  display: flex;
+  display: -webkit-flex; /* Safari */
+  flex-wrap: wrap;
+  align-content: space-around;
+  align-items: flex-start;
+  margin: 0 -@card-interval-space 0 0;
+}
+
+.playerCard {
+  margin: 0 @card-interval-space @card-interval-space 0;
+  border-radius: 10px;
+  box-shadow: 0 0 10px 0 #50505020;
+}
+
+.subPlayerCard {
+  width: calc(100% / 3 - @card-interval-space);
+}
+
+.mainPlayerCard {
+  order: -1;
+  width: calc(100% - @card-interval-space);
+}
+
+.playerCardsContainer:nth-of-type(n) {
+  .subPlayerCard {
+    order: n;
+  }
+}
+
+.reactPlayer {
+  width: auto;
+  height: auto;
+  .video {
+    border-radius: 10px;
+  }
+}

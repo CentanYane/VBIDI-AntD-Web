@@ -22,7 +22,7 @@ export async function queryStreamSquares(
   params: {
     // query
     /** 视频流id，指示要获取哪一个视频流的方框 */
-    id: string;
+    vid: string;
     // path
   },
   options?: { [key: string]: any },

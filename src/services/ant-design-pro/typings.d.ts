@@ -67,7 +67,7 @@ declare namespace API {
 
   type StreamSquareList = {
     /** 视频流id，指示这些方框是应用于哪一个视频流的 */
-    id?: string;
+    vid?: string;
     data?: StreamSquareItem[];
     /** 列表的内容总数 */
     total?: number;

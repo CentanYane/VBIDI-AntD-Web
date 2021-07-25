@@ -132,7 +132,7 @@
         "operationId": "queryStreamSquares",
         "parameters": [
           {
-            "name": "id",
+            "name": "vid",
             "in": "query",
             "description": "视频流id，指示要获取哪一个视频流的方框",
             "required": true,
@@ -321,7 +321,7 @@
       "StreamSquareList": {
         "type": "object",
         "properties": {
-          "id": {
+          "vid": {
             "type": "string",
             "description": "视频流id，指示这些方框是应用于哪一个视频流的"
           },

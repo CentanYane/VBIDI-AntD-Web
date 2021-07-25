@@ -1,7 +1,4 @@
-import {
-  LockOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, message, Tabs } from 'antd';
 import React, { useState } from 'react';
 import ProForm, { ProFormText } from '@ant-design/pro-form';
@@ -26,9 +23,12 @@ const LoginMessage: React.FC<{
 
 const Login: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
-  const [userLoginState, setUserLoginState] = useState<API.LoginResult>({status: '', token: '', userId: ''});
+  const [userLoginState, setUserLoginState] = useState<API.LoginResult>({
+    status: '',
+    token: '',
+  });
   const [type, setType] = useState<string>('account');
-  const { initialState, setInitialState } = useModel('@@initialState');
+  const { setInitialState } = useModel('@@initialState');
 
   const intl = useIntl();
 
@@ -39,8 +39,8 @@ const Login: React.FC = () => {
       const msg = await login({}, { ...values });
       if (msg.status === 'ok') {
         // 如果token无或者长度为0，报error
-        if(!msg.token?.length||!msg.userId?.length) {
-          throw new Error("校验信息不完整");
+        if (!msg.token?.length) {
+          throw new Error('校验信息不完整');
         }
         const defaultloginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
@@ -48,22 +48,15 @@ const Login: React.FC = () => {
         });
         message.success(defaultloginSuccessMessage);
         // 设置本地储存
-        localStorage.setItem('userId',msg.userId);
-        localStorage.setItem('token',msg.token);
-        // 手动setInitialState
-        await setInitialState({
-          ...initialState,
-          userId: msg.userId,
-          token: msg.token,
-        });
-        const userInfo = await queryUserInfo({}, { userId: msg.userId });
+        localStorage.setItem('token', msg.token);
+        const userInfo = await queryUserInfo({});
         if (userInfo) {
           await setInitialState((s) => ({
             ...s,
-            userInfo
+            token: msg.token,
+            userInfo,
           }));
-        }
-        else throw new Error("无法获取用户信息");
+        } else throw new Error('无法获取用户信息');
         /** 此方法会跳转到 redirect 参数所在的位置 */
         if (!history) return;
         const { query } = history.location;
