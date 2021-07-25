@@ -2,42 +2,37 @@
 /* eslint-disable */
 import { request } from 'umi';
 
-/** 获取直播视频流列表 POST /api/live/streams */
+/** 获取直播视频流列表 GET /api/live/streams */
 export async function queryStreams(
   params: {
     // path
   },
-  body: API.SafeQueryParams,
   options?: { [key: string]: any },
 ) {
   const { ...queryParams } = params;
   return request<API.StreamList>('/api/live/streams', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    method: 'GET',
     params: { ...queryParams },
-    data: body,
     ...(options || {}),
   });
 }
 
-/** 获取直播视频识别框列表 POST /api/live/streamSquares */
+/** 获取直播视频识别框列表 GET /api/live/streamSquares */
 export async function queryStreamSquares(
   params: {
+    // query
+    /** 视频流id，指示要获取哪一个视频流的方框 */
+    id: string;
     // path
   },
-  body: API.SafeQueryParams,
   options?: { [key: string]: any },
 ) {
   const { ...queryParams } = params;
   return request<API.StreamSquareList>('/api/live/streamSquares', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+    method: 'GET',
+    params: {
+      ...queryParams,
     },
-    params: { ...queryParams },
-    data: body,
     ...(options || {}),
   });
 }

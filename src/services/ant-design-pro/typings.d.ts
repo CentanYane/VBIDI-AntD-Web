@@ -2,11 +2,6 @@
 /* eslint-disable */
 
 declare namespace API {
-  type SafeQueryParams = {
-    /** 用户识别id */
-    userId: string;
-  };
-
   type UserInfo = {
     /** 要显示在界面上的用户名 */
     name?: string;
@@ -22,7 +17,7 @@ declare namespace API {
     /** token，根据userId计算，无超时 */
     token: string;
     /** 用户识别id */
-    userId: string;
+    userId?: string;
   };
 
   type LoginParams = {
@@ -41,7 +36,7 @@ declare namespace API {
 
   type StreamItem = {
     /** 视频流id */
-    id?: string;
+    vid: string;
     /** 取流时在链接后附加的key（eg rstp://link/?key=xxx），可以没有 */
     key?: string;
     /** 视频流标题 */

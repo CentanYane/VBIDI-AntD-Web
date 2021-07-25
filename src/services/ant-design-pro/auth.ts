@@ -2,22 +2,17 @@
 /* eslint-disable */
 import { request } from 'umi';
 
-/** 获取用户信息 POST /api/auth/userInfo */
+/** 获取用户信息 GET /api/auth/userInfo */
 export async function queryUserInfo(
   params: {
     // path
   },
-  body: API.SafeQueryParams,
   options?: { [key: string]: any },
 ) {
   const { ...queryParams } = params;
   return request<API.UserInfo>('/api/auth/userInfo', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    method: 'GET',
     params: { ...queryParams },
-    data: body,
     ...(options || {}),
   });
 }
