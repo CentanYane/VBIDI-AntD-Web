@@ -23,11 +23,23 @@ const handleFetchStreams = async (): Promise<API.StreamList> => {
   }
 };
 
+const handleFetchSquares = async (vid: string): Promise<API.StreamSquareList> => {
+  try {
+    const data = await queryStreamSquares({ vid });
+    if (!data.success) throw new Error();
+    return data;
+  } catch (error) {
+    return {};
+  }
+};
+
 const LiveStream = (): React.ReactNode => {
   const { initialState } = useModel('@@initialState');
   const [streamArray, setStreamArray] = useState<API.StreamItem[]>([]);
   const [mainStreamIndex, setMainStreamIndex] = useState<number>(0);
+  const [squareArray, setSquareArray] = useState<API.StreamSquareItem[]>([]);
 
+  // 初始化时执行且只执行一次，获取视所有频流
   useEffect(() => {
     const setStreams = async () => {
       try {
@@ -43,13 +55,23 @@ const LiveStream = (): React.ReactNode => {
     setStreams();
   }, [initialState?.token]);
 
+  const setSquares = async () => {
+    try {
+      const result = await handleFetchSquares(streamArray[mainStreamIndex].vid);
+      if (!result.data?.length) throw new Error();
+      setSquareArray(result.data);
+    } catch (error) {
+      message.error(error.message);
+    }
+  };
+
   return (
     <PageContainer waterMarkProps={{}}>
       <Flipper flipKey={mainStreamIndex}>
         <div className={styles.playerCardsContainer}>
           {streamArray.map((value, index) => {
             return (
-              <Flipped flipId={value.vid}>
+              <Flipped flipId={index} key={value.vid}>
                 <ProCard
                   title={value.title ? value.title : `未命名直播流_${index}`}
                   tooltip={`直播流_${index}`}
@@ -58,6 +80,10 @@ const LiveStream = (): React.ReactNode => {
                   }`}
                   onClick={() => {
                     setMainStreamIndex(index);
+                    document
+                      .getElementsByClassName(`${styles.mainPlayerCard}`)
+                      .item(0)
+                      ?.scrollIntoView({ behavior: 'smooth' });
                   }}
                 >
                   <>
@@ -72,11 +98,13 @@ const LiveStream = (): React.ReactNode => {
                       className={styles.reactPlayer}
                       url={value.href}
                       key={`reactPlayer_${value.vid}`}
-                      onProgress={(playerState) => {
-                        if (index === mainStreamIndex)
-                          queryStreamSquares({ vid: value.vid }, playerState);
+                      onProgress={() => {
+                        if (index === mainStreamIndex) setSquares();
                       }}
                     ></ReactPlayer>
+                    {/* {index === mainStreamIndex && (
+                      <canvas id='mainVideoCanvas'></canvas>
+                    )} */}
                   </>
                 </ProCard>
               </Flipped>
