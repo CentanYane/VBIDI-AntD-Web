@@ -46,8 +46,8 @@ const LiveStream = (): React.ReactNode => {
         if (!initialState?.token) throw new Error('初始化错误，请重新登陆！');
         const result = await handleFetchStreams();
         if (!result.data?.length) throw new Error('无法查询到有效视频流地址，请检查地址配置');
-        setStreamArray(result.data);
-        setMainStreamIndex(0);
+        if (result.data !== streamArray) setStreamArray(result.data);
+        if (mainStreamIndex !== 0) setMainStreamIndex(0);
       } catch (error) {
         message.error(error.message);
       }
@@ -59,7 +59,7 @@ const LiveStream = (): React.ReactNode => {
     try {
       const result = await handleFetchSquares(streamArray[mainStreamIndex].vid);
       if (!result.data?.length) throw new Error();
-      setSquareArray(result.data);
+      if (result.data !== squareArray) setSquareArray(result.data);
     } catch (error) {
       message.error(error.message);
     }
@@ -79,11 +79,13 @@ const LiveStream = (): React.ReactNode => {
                     index === mainStreamIndex ? styles.mainPlayerCard : styles.subPlayerCard
                   }`}
                   onClick={() => {
-                    setMainStreamIndex(index);
-                    document
-                      .getElementsByClassName(`${styles.mainPlayerCard}`)
-                      .item(0)
-                      ?.scrollIntoView({ behavior: 'smooth' });
+                    if (mainStreamIndex !== index) {
+                      setMainStreamIndex(index);
+                      document
+                        .getElementsByClassName(`${styles.mainPlayerCard}`)
+                        .item(0)
+                        ?.scrollIntoView({ behavior: 'smooth' });
+                    }
                   }}
                 >
                   <>

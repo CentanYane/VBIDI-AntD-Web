@@ -15,10 +15,16 @@
   margin: 0 @card-interval-space @card-interval-space 0;
   border-radius: 10px;
   box-shadow: 0 0 10px 0 #50505020;
+  transition: box-shadow 0.1s;
 }
 
 .subPlayerCard {
   width: calc(100% / 3 - @card-interval-space);
+}
+
+.subPlayerCard:hover {
+  box-shadow: 0 0 10px 5px #50505030;
+  transition: box-shadow 0.1s;
 }
 
 .mainPlayerCard {
