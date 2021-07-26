@@ -4,7 +4,7 @@ import { message } from 'antd';
 import { queryStreams, queryStreamSquares } from '@/services/ant-design-pro/live';
 import { useModel } from 'umi';
 import ReactPlayer from 'react-player';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import ProCard from '@ant-design/pro-card';
 import { Flipper, Flipped } from 'react-flip-toolkit';
 import styles from './index.less';
@@ -38,6 +38,7 @@ const LiveStream = (): React.ReactNode => {
   const [streamArray, setStreamArray] = useState<API.StreamItem[]>([]);
   const [mainStreamIndex, setMainStreamIndex] = useState<number>(0);
   const [squareArray, setSquareArray] = useState<API.StreamSquareItem[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // 初始化时执行且只执行一次，获取视所有频流
   useEffect(() => {
@@ -55,13 +56,32 @@ const LiveStream = (): React.ReactNode => {
     setStreams();
   }, [initialState?.token]);
 
-  const setSquares = async () => {
-    try {
-      const result = await handleFetchSquares(streamArray[mainStreamIndex].vid);
-      if (!result.data?.length) throw new Error();
-      if (result.data !== squareArray) setSquareArray(result.data);
-    } catch (error) {
-      message.error(error.message);
+  const drawSquares = async (index: number) => {
+    if (index === mainStreamIndex) {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d') || undefined;
+      if (canvas && ctx) {
+        try {
+          const result = await handleFetchSquares(streamArray[mainStreamIndex].vid);
+          if (!result.data?.length) throw new Error();
+          if (result.data !== squareArray) {
+            squareArray.forEach((value) => {
+              if (value.x && value.y && value.width && value.height) {
+                ctx.clearRect(value.x, value.y, value.width, value.height);
+              }
+            });
+            result.data.forEach((value) => {
+              if (value.x && value.y && value.width && value.height) {
+                ctx.rect(value.x, value.y, value.width, value.height);
+              }
+            });
+            ctx.stroke();
+            setSquareArray(result.data);
+          }
+        } catch (error) {
+          message.error(error.message);
+        }
+      }
     }
   };
 
@@ -88,7 +108,7 @@ const LiveStream = (): React.ReactNode => {
                     }
                   }}
                 >
-                  <>
+                  <div className={styles.mainContentContainer}>
                     <ReactPlayer
                       width=""
                       height=""
@@ -101,13 +121,13 @@ const LiveStream = (): React.ReactNode => {
                       url={value.href}
                       key={`reactPlayer_${value.vid}`}
                       onProgress={() => {
-                        if (index === mainStreamIndex) setSquares();
+                        drawSquares(index);
                       }}
                     ></ReactPlayer>
-                    {/* {index === mainStreamIndex && (
-                      <canvas id='mainVideoCanvas'></canvas>
-                    )} */}
-                  </>
+                    {index === mainStreamIndex && (
+                      <canvas className={styles.mainVideoCanvas} ref={canvasRef}></canvas>
+                    )}
+                  </div>
                 </ProCard>
               </Flipped>
             );
