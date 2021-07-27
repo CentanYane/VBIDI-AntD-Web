@@ -13,10 +13,15 @@ export default {
     //   changeOrigin: true,
     //   pathRewrite: { '^/api/auth': '' },
     // },
-    '/api/': {
-      target: 'http://localhost:8000', // https://preview.pro.ant.design',
+    '/api/auth': {
+      target: 'http://192.168.1.104:5000', // https://preview.pro.ant.design',
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { '^/api/auth': '' },
+    },
+    '/api/live': {
+      target: 'http://192.168.1.104:5000', // https://preview.pro.ant.design',
+      changeOrigin: true,
+      pathRewrite: { '^/api/live': '' },
     },
   },
   test: {

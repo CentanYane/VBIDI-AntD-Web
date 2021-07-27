@@ -3,11 +3,11 @@ import { PageContainer } from '@ant-design/pro-layout';
 import { message } from 'antd';
 import { queryStreams, queryStreamSquares } from '@/services/ant-design-pro/live';
 import { useModel } from 'umi';
-import ReactPlayer from 'react-player';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import ProCard from '@ant-design/pro-card';
 import { Flipper, Flipped } from 'react-flip-toolkit';
 import styles from './index.less';
+import MpegtsVideo from '@/components/MpegtsPlayer';
 
 const handleFetchStreams = async (): Promise<API.StreamList> => {
   message.loading('正在获取直播流列表');
@@ -38,7 +38,8 @@ const LiveStream = (): React.ReactNode => {
   const [streamArray, setStreamArray] = useState<API.StreamItem[]>([]);
   const [mainStreamIndex, setMainStreamIndex] = useState<number>(0);
   const [squareArray, setSquareArray] = useState<API.StreamSquareItem[]>([]);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const canvasRef = React.createRef<HTMLCanvasElement>();
+  const mainVideoRef = React.createRef<MpegtsVideo>();
 
   // 初始化时执行且只执行一次，获取视所有频流
   useEffect(() => {
@@ -61,18 +62,36 @@ const LiveStream = (): React.ReactNode => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d') || undefined;
       if (canvas && ctx) {
+        ctx.fillStyle = 'rgba(255,255,255,0)';
         try {
           const result = await handleFetchSquares(streamArray[mainStreamIndex].vid);
-          if (!result.data?.length) throw new Error();
+          if (!result.data?.length) return;
+
           if (result.data !== squareArray) {
-            squareArray.forEach((value) => {
-              if (value.x && value.y && value.width && value.height) {
-                ctx.clearRect(value.x, value.y, value.width, value.height);
-              }
-            });
+            const realVideo = mainVideoRef.current?.videoRef.current;
+            const scaleRate = (realVideo?.videoWidth || 1) / (realVideo?.videoWidth || 1);
+            console.log(realVideo?.clientWidth, realVideo?.videoWidth, scaleRate);
+            console.log(canvas.width, canvas.clientWidth);
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.strokeStyle = 'green';
             result.data.forEach((value) => {
+              console.log('aaaaaa', value.x, value.y, value.width, value.height);
               if (value.x && value.y && value.width && value.height) {
-                ctx.rect(value.x, value.y, value.width, value.height);
+                console.log(
+                  value.x * scaleRate,
+                  value.y * scaleRate,
+                  value.width * scaleRate,
+                  value.height * scaleRate,
+                );
+                ctx.rect(
+                  value.x * scaleRate,
+                  value.y * scaleRate,
+                  value.width * scaleRate,
+                  value.height * scaleRate,
+                );
               }
             });
             ctx.stroke();
@@ -109,24 +128,29 @@ const LiveStream = (): React.ReactNode => {
                   }}
                 >
                   <div className={styles.mainContentContainer}>
-                    <ReactPlayer
-                      width=""
-                      height=""
-                      muted={true}
-                      autoPlay={true}
-                      controls
-                      playsinline={true}
-                      playing={true}
-                      className={styles.reactPlayer}
-                      url={value.href}
-                      key={`reactPlayer_${value.vid}`}
-                      onProgress={() => {
-                        drawSquares(index);
-                      }}
-                    ></ReactPlayer>
                     {index === mainStreamIndex && (
                       <canvas className={styles.mainVideoCanvas} ref={canvasRef}></canvas>
                     )}
+                    <MpegtsVideo
+                      mediaDataSource={{
+                        type: 'mse',
+                        isLive: true,
+                        url: value.href,
+                      }}
+                      config={{
+                        enableWorker: true,
+                        lazyLoadMaxDuration: 3 * 60,
+                        seekType: 'range',
+                        liveBufferLatencyChasing: true,
+                      }}
+                      onProgress={() => {
+                        if (index === mainStreamIndex) drawSquares(index);
+                      }}
+                      autoPlay
+                      controls
+                      className={styles.livePlayer}
+                      ref={mainVideoRef}
+                    ></MpegtsVideo>
                   </div>
                 </ProCard>
               </Flipped>
