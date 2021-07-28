@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import { message } from 'antd';
 import { queryStreams, queryStreamSquares } from '@/services/ant-design-pro/live';
-import { useModel } from 'umi';
 import { useState } from 'react';
 import ProCard from '@ant-design/pro-card';
 import { Flipper, Flipped } from 'react-flip-toolkit';
 import styles from './index.less';
 import MpegtsVideo from '@/components/MpegtsPlayer';
+import { useBoolean, useMount, useUnmount } from '@umijs/hooks';
+import { useLayoutEffect } from 'react';
+import type Mpegts from 'mpegts.js';
 
 const handleFetchStreams = async (): Promise<API.StreamList> => {
   message.loading('正在获取直播流列表');
@@ -33,76 +35,91 @@ const handleFetchSquares = async (vid: string): Promise<API.StreamSquareList> =>
   }
 };
 
-const LiveStream = (): React.ReactNode => {
-  const { initialState } = useModel('@@initialState');
+const LiveStream: React.ReactNode = () => {
   const [streamArray, setStreamArray] = useState<API.StreamItem[]>([]);
-  const [mainStreamIndex, setMainStreamIndex] = useState<number>(0);
+  const [mainStreamIndex, setMainStreamIndex] = useState<number>();
   const [squareArray, setSquareArray] = useState<API.StreamSquareItem[]>([]);
   const canvasRef = React.createRef<HTMLCanvasElement>();
-  const mainVideoRef = React.createRef<MpegtsVideo>();
+  const [canvasScaleRate, setCanvasScaleRate] = React.useState<number>(0);
+  const isMainStreamPlaying = useBoolean(false);
 
-  // 初始化时执行且只执行一次，获取视所有频流
-  useEffect(() => {
+  // 初始化时执行且只执行一次，获取所有视频流
+  useMount(() => {
     const setStreams = async () => {
       try {
-        if (!initialState?.token) throw new Error('初始化错误，请重新登陆！');
         const result = await handleFetchStreams();
         if (!result.data?.length) throw new Error('无法查询到有效视频流地址，请检查地址配置');
-        if (result.data !== streamArray) setStreamArray(result.data);
-        if (mainStreamIndex !== 0) setMainStreamIndex(0);
+        setStreamArray(result.data);
+        setMainStreamIndex(0);
       } catch (error) {
         message.error(error.message);
       }
     };
     setStreams();
-  }, [initialState?.token]);
+  });
 
-  const drawSquares = async (index: number) => {
-    if (index === mainStreamIndex) {
+  useUnmount(() => {
+    isMainStreamPlaying.setFalse();
+  });
+
+  /** 测量布局，设置canvas实际大小 */
+  useLayoutEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas && canvas.width !== canvas.clientWidth) {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    }
+  }, [canvasRef]);
+
+  /** 更新主视频的方框列表 */
+  const updateStreamSquaresState = async () => {
+    try {
+      if (mainStreamIndex !== undefined && isMainStreamPlaying.state) {
+        const result = await handleFetchSquares(streamArray[mainStreamIndex].vid);
+        if (result.data?.length) {
+          setSquareArray(result.data);
+        }
+      }
+    } catch (error) {
+      setMainStreamIndex(undefined);
+    }
+  };
+
+  /** 确保能拿到canvasRef.current */
+  useLayoutEffect(() => {
+    const clearSquares = () => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d') || undefined;
       if (canvas && ctx) {
         ctx.fillStyle = 'rgba(255,255,255,0)';
-        try {
-          const result = await handleFetchSquares(streamArray[mainStreamIndex].vid);
-          if (!result.data?.length) return;
-
-          if (result.data !== squareArray) {
-            const realVideo = mainVideoRef.current?.videoRef.current;
-            const scaleRate = (realVideo?.videoWidth || 1) / (realVideo?.videoWidth || 1);
-            console.log(realVideo?.clientWidth, realVideo?.videoWidth, scaleRate);
-            console.log(canvas.width, canvas.clientWidth);
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.beginPath();
-            ctx.strokeStyle = 'green';
-            result.data.forEach((value) => {
-              console.log('aaaaaa', value.x, value.y, value.width, value.height);
-              if (value.x && value.y && value.width && value.height) {
-                console.log(
-                  value.x * scaleRate,
-                  value.y * scaleRate,
-                  value.width * scaleRate,
-                  value.height * scaleRate,
-                );
-                ctx.rect(
-                  value.x * scaleRate,
-                  value.y * scaleRate,
-                  value.width * scaleRate,
-                  value.height * scaleRate,
-                );
-              }
-            });
-            ctx.stroke();
-            setSquareArray(result.data);
-          }
-        } catch (error) {
-          message.error(error.message);
-        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-    }
-  };
+    };
+    const drawSquares = () => {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d') || undefined;
+      if (canvas && ctx && squareArray.length > 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0)';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.strokeStyle = 'green';
+        squareArray.forEach((value) => {
+          if (value.x && value.y && value.width && value.height) {
+            ctx.rect(
+              value.x * canvasScaleRate,
+              value.y * canvasScaleRate,
+              value.width * canvasScaleRate,
+              value.height * canvasScaleRate,
+            );
+          }
+        });
+        ctx.closePath();
+        ctx.stroke();
+        setTimeout(clearSquares, 1000);
+      }
+    };
+    drawSquares();
+  }, [canvasRef, canvasScaleRate, squareArray]);
 
   return (
     <PageContainer waterMarkProps={{}}>
@@ -117,21 +134,24 @@ const LiveStream = (): React.ReactNode => {
                   className={`${styles.playerCard} ${
                     index === mainStreamIndex ? styles.mainPlayerCard : styles.subPlayerCard
                   }`}
-                  onClick={() => {
-                    if (mainStreamIndex !== index) {
-                      setMainStreamIndex(index);
-                      document
-                        .getElementsByClassName(`${styles.mainPlayerCard}`)
-                        .item(0)
-                        ?.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
+                  onClick={
+                    mainStreamIndex !== index
+                      ? () => {
+                          setMainStreamIndex(index);
+                          document
+                            .getElementsByClassName(`${styles.mainPlayerCard}`)
+                            .item(0)
+                            ?.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      : undefined
+                  }
                 >
                   <div className={styles.mainContentContainer}>
                     {index === mainStreamIndex && (
                       <canvas className={styles.mainVideoCanvas} ref={canvasRef}></canvas>
                     )}
                     <MpegtsVideo
+                      className={styles.livePlayer}
                       mediaDataSource={{
                         type: 'mse',
                         isLive: true,
@@ -143,13 +163,49 @@ const LiveStream = (): React.ReactNode => {
                         seekType: 'range',
                         liveBufferLatencyChasing: true,
                       }}
-                      onProgress={() => {
-                        if (index === mainStreamIndex) drawSquares(index);
-                      }}
-                      autoPlay
-                      controls
-                      className={styles.livePlayer}
-                      ref={mainVideoRef}
+                      onPlay={
+                        index === mainStreamIndex
+                          ? (
+                              _player?: Mpegts.Player,
+                              video?: React.RefObject<HTMLVideoElement>,
+                            ) => {
+                              if (video?.current) {
+                                setCanvasScaleRate(
+                                  video.current?.clientWidth / video.current?.videoWidth,
+                                );
+                              }
+                            }
+                          : undefined
+                      }
+                      onProgress={
+                        index === mainStreamIndex
+                          ? (
+                              _player?: Mpegts.Player,
+                              video?: React.RefObject<HTMLVideoElement>,
+                            ) => {
+                              if (video?.current) {
+                                if (
+                                  video?.current.currentTime > 0 &&
+                                  !video?.current.paused &&
+                                  !video?.current.ended &&
+                                  video?.current.readyState > 2
+                                ) {
+                                  isMainStreamPlaying.setTrue();
+                                  updateStreamSquaresState();
+                                }
+                              }
+                            }
+                          : undefined
+                      }
+                      onPause={
+                        index === mainStreamIndex
+                          ? () => {
+                              isMainStreamPlaying.setFalse();
+                            }
+                          : undefined
+                      }
+                      autoPlay={true}
+                      controls={true}
                     ></MpegtsVideo>
                   </div>
                 </ProCard>

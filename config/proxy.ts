@@ -14,12 +14,12 @@ export default {
     //   pathRewrite: { '^/api/auth': '' },
     // },
     '/api/auth': {
-      target: 'http://192.168.1.104:5000', // https://preview.pro.ant.design',
+      target: 'http://192.168.1.100:5000', // https://preview.pro.ant.design',
       changeOrigin: true,
       pathRewrite: { '^/api/auth': '' },
     },
     '/api/live': {
-      target: 'http://192.168.1.104:5000', // https://preview.pro.ant.design',
+      target: 'http://192.168.1.100:5000', // https://preview.pro.ant.design',
       changeOrigin: true,
       pathRewrite: { '^/api/live': '' },
     },
