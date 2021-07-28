@@ -45,21 +45,23 @@ class MpegtsVideo extends React.Component<MpegtsVideoProps> {
 
   render() {
     return (
-      <video
-        className={this.props.className}
-        ref={this.videoRef}
-        onProgress={() => {
-          if (this.props.onProgress) this.props.onProgress(this.player, this.videoRef);
-        }}
-        autoPlay={this.props.autoPlay}
-        controls={this.props.controls}
-        onPlay={() => {
-          if (this.props.onPlay) this.props.onPlay(this.player, this.videoRef);
-        }}
-        onPause={() => {
-          if (this.props.onPause) this.props.onPause(this.player, this.videoRef);
-        }}
-      ></video>
+      <div>
+        <video
+          className={this.props.className}
+          ref={this.videoRef}
+          onProgress={() => {
+            if (this.props.onProgress) this.props.onProgress(this.player, this.videoRef);
+          }}
+          autoPlay={this.props.autoPlay}
+          controls={this.props.controls}
+          onPlay={() => {
+            if (this.props.onPlay) this.props.onPlay(this.player, this.videoRef);
+          }}
+          onPause={() => {
+            if (this.props.onPause) this.props.onPause(this.player, this.videoRef);
+          }}
+        ></video>
+      </div>
     );
   }
 }

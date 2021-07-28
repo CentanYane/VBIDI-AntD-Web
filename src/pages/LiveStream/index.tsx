@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useLayoutEffect } from 'react';
 import { useBoolean, useMount, useUnmount } from '@umijs/hooks';
-import { message } from 'antd';
+import { message, Switch } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProCard from '@ant-design/pro-card';
 import { Flipper, Flipped } from 'react-flip-toolkit';
@@ -41,8 +41,13 @@ const LiveStream: React.ReactNode = () => {
   const canvasRef = React.createRef<HTMLCanvasElement>();
   const [canvasScaleRate, setCanvasScaleRate] = React.useState<number>(0);
   const isMainStreamPlaying = useBoolean(false);
-  const [mainVideoSourceSize, setMainVideoSourceSize] =
-    useState<{ width: number; height: number }>();
+  const isSqauresTurnedOn = useBoolean(false);
+  const [mainVideoSize, setMainVideoSize] = useState<{
+    videoWidth: number;
+    videoHeight: number;
+    clientWidth: number;
+    clientHeight: number;
+  }>();
 
   // 初始化时执行且只执行一次，获取所有视频流
   useMount(() => {
@@ -59,8 +64,8 @@ const LiveStream: React.ReactNode = () => {
     setStreams();
   });
 
-  // 卸载时设置false，阻止继续请求方框
   useUnmount(() => {
+    // 卸载时设置false，阻止继续请求方框
     isMainStreamPlaying.setFalse();
     setStreamArray([]);
     setSquareArray([]);
@@ -71,28 +76,43 @@ const LiveStream: React.ReactNode = () => {
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
-      if (canvas.width !== canvas.clientWidth) {
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
-      }
-      if (mainVideoSourceSize && canvas.width !== mainVideoSourceSize?.width) {
-        setCanvasScaleRate(canvas.width / mainVideoSourceSize.width);
+      // canvas.clientWidth 和 canvas.clientHeight 获取的大小不正确
+      // if (canvas.width !== canvas.clientWidth) {
+      //   canvas.width = canvas.clientWidth;
+      //   canvas.height = canvas.clientHeight;
+      // }
+      if (mainVideoSize) {
+        if (
+          canvas.clientWidth !== mainVideoSize?.clientWidth ||
+          canvas.clientHeight !== mainVideoSize?.clientHeight
+        ) {
+          canvas.width = mainVideoSize.clientWidth;
+          canvas.height = mainVideoSize.clientHeight;
+        }
+        const tempScale = canvas.width / mainVideoSize.videoWidth;
+        if (mainVideoSize && canvasScaleRate !== tempScale) {
+          setCanvasScaleRate(tempScale);
+        }
       }
     }
-  }, [canvasRef, mainVideoSourceSize]);
+    // 不监控 canvasScaleRate，防止自循环
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canvasRef, mainVideoSize]);
 
   /** 更新主视频的方框列表 */
   const updateStreamSquaresState = async () => {
     try {
-      if (mainStreamIndex !== undefined && isMainStreamPlaying.state) {
+      if (mainStreamIndex !== undefined && isMainStreamPlaying.state && isSqauresTurnedOn.state) {
         const result = await handleFetchSquares(streamArray[mainStreamIndex].vid);
         if (result.data?.length) {
           setSquareArray(result.data);
+          return;
         }
       }
     } catch (error) {
       setMainStreamIndex(undefined);
     }
+    setSquareArray([]);
   };
 
   /** 确保能拿到canvasRef.current */
@@ -102,7 +122,6 @@ const LiveStream: React.ReactNode = () => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d') || undefined;
       if (canvas && ctx) {
-        ctx.fillStyle = 'rgba(255,255,255,0)';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     };
@@ -111,22 +130,42 @@ const LiveStream: React.ReactNode = () => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d') || undefined;
       if (canvas && ctx && squareArray.length > 0) {
-        ctx.fillStyle = 'rgba(255,255,255,0)';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.strokeStyle = 'green';
         squareArray.forEach((value) => {
           if (value.x && value.y && value.width && value.height) {
-            ctx.rect(
-              value.x * canvasScaleRate,
-              value.y * canvasScaleRate,
-              value.width * canvasScaleRate,
-              value.height * canvasScaleRate,
-            );
+            // 按照 {画布大小/原视频大小} 缩放
+            const rect = {
+              x: value.x * canvasScaleRate,
+              y: value.y * canvasScaleRate,
+              w: value.width * canvasScaleRate,
+              h: value.height * canvasScaleRate,
+            };
+
+            // 不知道为什么画不了(0, 0)，所以偏移一点点
+            if (rect.x === 0) rect.x = 1;
+            if (rect.y === 0) rect.y = 1;
+            if (rect.x + rect.w === canvas.width) rect.w -= 1;
+            if (rect.y + rect.h === canvas.height) rect.h -= 1;
+
+            ctx.beginPath();
+
+            if (value.group === 'suspects') {
+              ctx.strokeStyle = 'red';
+              ctx.fillStyle = 'red';
+            } else {
+              ctx.strokeStyle = 'green';
+              ctx.fillStyle = 'green';
+            }
+            ctx.lineWidth = 2;
+            ctx.rect(rect.x, rect.y, rect.w, rect.h);
+            ctx.textBaseline = 'top';
+            ctx.font = 'bold 1.5em Sans-serif';
+            if (value.name) ctx.fillText(value.name, rect.x + 5, rect.y + 5, rect.w - 10);
+
+            ctx.closePath();
+            ctx.stroke();
           }
         });
-        ctx.closePath();
-        ctx.stroke();
         // 1000ms后清除
         setTimeout(clearSquares, 1000);
       }
@@ -147,6 +186,18 @@ const LiveStream: React.ReactNode = () => {
                   className={`${styles.playerCard} ${
                     index === mainStreamIndex ? styles.mainPlayerCard : styles.subPlayerCard
                   }`}
+                  extra={
+                    index === mainStreamIndex ? (
+                      <div className={styles.rightSwitchWrapper}>
+                        识别框
+                        <Switch
+                          className={styles.squaresOpenSwitch}
+                          defaultChecked={isSqauresTurnedOn.state}
+                          onChange={(checked) => isSqauresTurnedOn.toggle(checked)}
+                        />
+                      </div>
+                    ) : undefined
+                  }
                   onClick={
                     mainStreamIndex !== index
                       ? () => {
@@ -189,9 +240,11 @@ const LiveStream: React.ReactNode = () => {
                                   !video?.current.ended &&
                                   video?.current.readyState > 2
                                 ) {
-                                  setMainVideoSourceSize({
-                                    width: video.current.videoWidth,
-                                    height: video.current.videoHeight,
+                                  setMainVideoSize({
+                                    videoWidth: video.current.videoWidth,
+                                    videoHeight: video.current.videoHeight,
+                                    clientWidth: video.current.clientWidth,
+                                    clientHeight: video.current.clientHeight,
                                   });
                                   isMainStreamPlaying.setTrue();
                                   updateStreamSquaresState();

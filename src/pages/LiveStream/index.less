@@ -30,6 +30,13 @@
 .mainPlayerCard {
   order: -1; // 排到第一个
   width: calc(100% - @card-interval-space);
+  .rightSwitchWrapper {
+    display: inline-flex;
+    align-items: center;
+    .squaresOpenSwitch {
+      margin-left: 4px;
+    }
+  }
 }
 
 .playerCardsContainer:nth-of-type(n) {
@@ -44,7 +51,6 @@
 
 .livePlayer {
   width: 100%;
-  height: auto;
   border-radius: 10px;
 }
 
