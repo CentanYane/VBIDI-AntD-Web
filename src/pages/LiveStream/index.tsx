@@ -1,15 +1,14 @@
 import React from 'react';
-import { PageContainer } from '@ant-design/pro-layout';
+import { useState, useLayoutEffect } from 'react';
+import { useBoolean, useMount, useUnmount } from '@umijs/hooks';
 import { message } from 'antd';
-import { queryStreams, queryStreamSquares } from '@/services/ant-design-pro/live';
-import { useState } from 'react';
+import { PageContainer } from '@ant-design/pro-layout';
 import ProCard from '@ant-design/pro-card';
 import { Flipper, Flipped } from 'react-flip-toolkit';
+import { queryStreams, queryStreamSquares } from '@/services/ant-design-pro/live';
 import styles from './index.less';
-import MpegtsVideo from '@/components/MpegtsPlayer';
-import { useBoolean, useMount, useUnmount } from '@umijs/hooks';
-import { useLayoutEffect } from 'react';
 import type Mpegts from 'mpegts.js';
+import MpegtsVideo from './components/MpegtsVideo';
 
 const handleFetchStreams = async (): Promise<API.StreamList> => {
   message.loading('正在获取直播流列表');
@@ -63,6 +62,9 @@ const LiveStream: React.ReactNode = () => {
   // 卸载时设置false，阻止继续请求方框
   useUnmount(() => {
     isMainStreamPlaying.setFalse();
+    setStreamArray([]);
+    setSquareArray([]);
+    setMainStreamIndex(0);
   });
 
   /** 测量布局，设置canvas实际大小 */
