@@ -42,6 +42,8 @@ const LiveStream: React.ReactNode = () => {
   const canvasRef = React.createRef<HTMLCanvasElement>();
   const [canvasScaleRate, setCanvasScaleRate] = React.useState<number>(0);
   const isMainStreamPlaying = useBoolean(false);
+  const [mainVideoSourceSize, setMainVideoSourceSize] =
+    useState<{ width: number; height: number }>();
 
   // 初始化时执行且只执行一次，获取所有视频流
   useMount(() => {
@@ -58,6 +60,7 @@ const LiveStream: React.ReactNode = () => {
     setStreams();
   });
 
+  // 卸载时设置false，阻止继续请求方框
   useUnmount(() => {
     isMainStreamPlaying.setFalse();
   });
@@ -65,11 +68,16 @@ const LiveStream: React.ReactNode = () => {
   /** 测量布局，设置canvas实际大小 */
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
-    if (canvas && canvas.width !== canvas.clientWidth) {
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
+    if (canvas) {
+      if (canvas.width !== canvas.clientWidth) {
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+      }
+      if (mainVideoSourceSize && canvas.width !== mainVideoSourceSize?.width) {
+        setCanvasScaleRate(canvas.width / mainVideoSourceSize.width);
+      }
     }
-  }, [canvasRef]);
+  }, [canvasRef, mainVideoSourceSize]);
 
   /** 更新主视频的方框列表 */
   const updateStreamSquaresState = async () => {
@@ -87,6 +95,7 @@ const LiveStream: React.ReactNode = () => {
 
   /** 确保能拿到canvasRef.current */
   useLayoutEffect(() => {
+    /** 清除方框 */
     const clearSquares = () => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d') || undefined;
@@ -95,6 +104,7 @@ const LiveStream: React.ReactNode = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     };
+    /** 绘制方框 */
     const drawSquares = () => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d') || undefined;
@@ -115,6 +125,7 @@ const LiveStream: React.ReactNode = () => {
         });
         ctx.closePath();
         ctx.stroke();
+        // 1000ms后清除
         setTimeout(clearSquares, 1000);
       }
     };
@@ -163,20 +174,6 @@ const LiveStream: React.ReactNode = () => {
                         seekType: 'range',
                         liveBufferLatencyChasing: true,
                       }}
-                      onPlay={
-                        index === mainStreamIndex
-                          ? (
-                              _player?: Mpegts.Player,
-                              video?: React.RefObject<HTMLVideoElement>,
-                            ) => {
-                              if (video?.current) {
-                                setCanvasScaleRate(
-                                  video.current?.clientWidth / video.current?.videoWidth,
-                                );
-                              }
-                            }
-                          : undefined
-                      }
                       onProgress={
                         index === mainStreamIndex
                           ? (
@@ -190,6 +187,10 @@ const LiveStream: React.ReactNode = () => {
                                   !video?.current.ended &&
                                   video?.current.readyState > 2
                                 ) {
+                                  setMainVideoSourceSize({
+                                    width: video.current.videoWidth,
+                                    height: video.current.videoHeight,
+                                  });
                                   isMainStreamPlaying.setTrue();
                                   updateStreamSquaresState();
                                 }
@@ -200,6 +201,7 @@ const LiveStream: React.ReactNode = () => {
                       onPause={
                         index === mainStreamIndex
                           ? () => {
+                              // 暂停或者视频卡顿时不获取方框
                               isMainStreamPlaying.setFalse();
                             }
                           : undefined
