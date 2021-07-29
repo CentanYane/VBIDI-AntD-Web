@@ -4,6 +4,6 @@
 export default function access(initialState: { userInfo?: API.UserInfo | undefined }) {
   const { userInfo } = initialState || {};
   return {
-    canAdmin: userInfo && userInfo.group === 'Admin',
+    canAdmin: userInfo && userInfo.group === 'admin',
   };
 }

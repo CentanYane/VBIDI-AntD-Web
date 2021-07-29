@@ -41,8 +41,7 @@
         component: './Welcome',
       },
     ],
-  },
-  // {
+  }, // {
   //   name: 'list.table-list',
   //   icon: 'table',
   //   path: '/list',
@@ -51,6 +50,12 @@
   {
     path: '/',
     redirect: '/welcome',
+  },
+  {
+    name: '检测记录',
+    icon: 'smile',
+    path: '/detectionrecord',
+    component: './DetectionRecord',
   },
   {
     component: './404',
