@@ -24,8 +24,20 @@
   {
     path: '/livestream',
     name: 'livestream',
-    icon: 'smile',
+    icon: 'video-camera',
     component: './LiveStream',
+  },
+  {
+    name: '检测记录',
+    icon: 'alert',
+    path: '/detectionrecord',
+    component: './DetectionRecord',
+  },
+  {
+    name: '统计信息',
+    icon: 'pie-chart',
+    path: '/statistics',
+    component: './Statistics',
   },
   {
     path: '/admin',
@@ -50,12 +62,6 @@
   {
     path: '/',
     redirect: '/welcome',
-  },
-  {
-    name: '检测记录',
-    icon: 'smile',
-    path: '/detectionrecord',
-    component: './DetectionRecord',
   },
   {
     component: './404',
