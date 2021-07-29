@@ -14,7 +14,9 @@ import type { RecordTableListItem } from './data';
 import PreviewVideo from './components/PreviewVideo';
 import { useBoolean } from '@umijs/hooks';
 import { isNull } from 'lodash';
-import ProDescriptions, { ProDescriptionsItemProps } from '@ant-design/pro-descriptions';
+import type { ProDescriptionsItemProps } from '@ant-design/pro-descriptions';
+import ProDescriptions from '@ant-design/pro-descriptions';
+import { saveAs } from 'file-saver';
 
 /**
  * 更新节点
@@ -62,30 +64,6 @@ const handleRemove = async (selectedRows: RecordTableListItem[]) => {
     message.error('删除失败，请重试');
     return false;
   }
-};
-
-/**
- * 跨域下载文件（需要服务器设置CORS头）
- * @param url
- * @param name
- */
-const download = (url: string, name: string) => {
-  if (!url) {
-    message.error('URL错误');
-  }
-  fetch(url)
-    .then((response) => response.blob())
-    .then((blob) => {
-      const blobURL = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobURL;
-      a.target = '_blank';
-      a.setAttribute('display', 'none');
-      if (name && name.length) a.download = name;
-      document.body.appendChild(a);
-      a.click();
-    })
-    .catch((error) => message.error(error.message));
 };
 
 const TableList: React.FC = () => {
@@ -160,7 +138,7 @@ const TableList: React.FC = () => {
           ),
           <a
             key="download"
-            onClick={() => download(href, `${name}_${id}_${time.replace(' ', '_')}`)}
+            onClick={() => saveAs(href, `${name}_${id}_${time}`.replace(' ', '_'))}
             style={{ right: 0 }}
           >
             下载
@@ -186,6 +164,30 @@ const TableList: React.FC = () => {
           },
         }}
         className={styles.detectionTable}
+        tableAlertOptionRender={(props) => {
+          return (
+            <span>
+              {props.selectedRows.length > 1 && (
+                <a
+                  onClick={async () => {
+                    // todo
+                  }}
+                  style={{ margin: '10px' }}
+                >
+                  批量下载
+                </a>
+              )}
+              <a
+                onClick={async () => {
+                  setSelectedRows([]);
+                  if (actionRef.current?.clearSelected) actionRef?.current?.clearSelected();
+                }}
+              >
+                取消选择
+              </a>
+            </span>
+          );
+        }}
       />
       {/* {selectedRowsState?.length > 0 && (
         <FooterToolbar
@@ -241,7 +243,7 @@ const TableList: React.FC = () => {
       ></PreviewVideo>
 
       <Drawer
-        width={600}
+        width={window.innerWidth > window.innerHeight ? '35%' : '75%'}
         visible={showDetail}
         onClose={() => {
           setCurrentRow(undefined);

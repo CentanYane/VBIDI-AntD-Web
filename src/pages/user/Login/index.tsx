@@ -83,7 +83,7 @@ const Login: React.FC = () => {
           <div className={styles.header}>
             <Link to="/">
               <img alt="logo" className={styles.logo} src="/logo.svg" />
-              <span className={styles.title}>Ant Design</span>
+              <span className={styles.title}>VBIDI</span>
             </Link>
           </div>
           <div className={styles.desc}>
@@ -190,20 +190,6 @@ const Login: React.FC = () => {
                 />
               </>
             )}
-
-            <div
-              style={{
-                marginBottom: 24,
-              }}
-            >
-              <a
-                style={{
-                  float: 'right',
-                }}
-              >
-                <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" />
-              </a>
-            </div>
           </ProForm>
         </div>
       </div>
