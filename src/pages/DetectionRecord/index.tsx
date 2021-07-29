@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // import { PlusOutlined } from '@ant-design/icons';
-import { message } from 'antd';
+import { Drawer, message } from 'antd';
 import React, { useState, useRef } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import styles from './index.less';
@@ -14,6 +14,7 @@ import type { RecordTableListItem } from './data';
 import PreviewVideo from './components/PreviewVideo';
 import { useBoolean } from '@umijs/hooks';
 import { isNull } from 'lodash';
+import ProDescriptions, { ProDescriptionsItemProps } from '@ant-design/pro-descriptions';
 
 /**
  * 更新节点
@@ -239,7 +240,7 @@ const TableList: React.FC = () => {
         src={previewVideoSrc}
       ></PreviewVideo>
 
-      {/* <Drawer
+      <Drawer
         width={600}
         visible={showDetail}
         onClose={() => {
@@ -261,7 +262,7 @@ const TableList: React.FC = () => {
             columns={columns as ProDescriptionsItemProps<RecordTableListItem>[]}
           />
         )}
-      </Drawer> */}
+      </Drawer>
     </PageContainer>
   );
 };
