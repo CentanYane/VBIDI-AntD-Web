@@ -216,7 +216,7 @@ const TableList: React.FC = () => {
           </Button>
         </FooterToolbar>
       )} */}
-      <UpdateForm
+      {/* <UpdateForm
         onSubmit={async (value) => {
           const success = await handleUpdate(value);
 
@@ -235,7 +235,7 @@ const TableList: React.FC = () => {
         }}
         updateModalVisible={updateModalVisible}
         values={currentRow || {}}
-      />
+      /> */}
       <PreviewVideo
         modalVisible={previewVideoVisible.state}
         onCancel={previewVideoVisible.setFalse}
